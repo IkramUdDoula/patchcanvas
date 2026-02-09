@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+/* PatchCanvas Theme - Black/White with Tailwind Accent Colors */
+
+:root {
+  /* Light mode - zinc palette */
+  --background: #fafafa; /* zinc-50 */
+  --foreground: #18181b; /* zinc-900 */
+  --muted: #f4f4f5; /* zinc-100 */
+  --muted-foreground: #71717a; /* zinc-500 */
+  --border: #f4f4f5; /* zinc-100 - lighter */
+  --input: #f4f4f5; /* zinc-100 - lighter */
+  --ring: #3b82f6; /* blue-500 */
+  
+  /* Accent colors for highlighting */
+  --accent-blue: #3b82f6; /* blue-500 */
+  --accent-green: #22c55e; /* green-500 */
+  --accent-red: #ef4444; /* red-500 */
+  --accent-yellow: #eab308; /* yellow-500 */
+  
+  /* Card and popover */
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  
+  /* Primary (black in light mode) */
+  --primary: #18181b; /* zinc-900 */
+  --primary-foreground: #fafafa; /* zinc-50 */
+  
+  /* Secondary */
+  --secondary: #f4f4f5; /* zinc-100 */
+  --secondary-foreground: #18181b; /* zinc-900 */
+  
+  /* Destructive */
+  --destructive: #ef4444; /* red-500 */
+  --destructive-foreground: #fafafa;
+  
+  /* Radius */
+  --radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark mode - zinc palette */
+    --background: #09090b; /* zinc-950 */
+    --foreground: #fafafa; /* zinc-50 */
+    --muted: #27272a; /* zinc-800 */
+    --muted-foreground: #a1a1aa; /* zinc-400 */
+    --border: #1a1a1d; /* zinc-900 - lighter/darker than zinc-950 */
+    --input: #1a1a1d; /* zinc-900 - lighter/darker than zinc-950 */
+    --ring: #3b82f6; /* blue-500 */
+    
+    /* Card and popover */
+    --card: #18181b; /* zinc-900 */
+    --card-foreground: #fafafa;
+    --popover: #18181b;
+    --popover-foreground: #fafafa;
+    
+    /* Primary (white in dark mode) */
+    --primary: #fafafa; /* zinc-50 */
+    --primary-foreground: #18181b; /* zinc-900 */
+    
+    /* Secondary */
+    --secondary: #27272a; /* zinc-800 */
+    --secondary-foreground: #fafafa;
+  }
+}
+
+/* Theme class overrides for manual theme switching */
+.light {
+  --background: #fafafa;
+  --foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --border: #f4f4f5;
+  --input: #f4f4f5;
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  --primary: #18181b;
+  --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+}
+
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --border: #1a1a1d;
+  --input: #1a1a1d;
+  --card: #18181b;
+  --card-foreground: #fafafa;
+  --popover: #18181b;
+  --popover-foreground: #fafafa;
+  --primary: #fafafa;
+  --primary-foreground: #18181b;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-green: var(--accent-green);
+  --color-accent-red: var(--accent-red);
+  --color-accent-yellow: var(--accent-yellow);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Utility classes for accent colors */
+.text-accent-blue { color: var(--accent-blue); }
+.text-accent-green { color: var(--accent-green); }
+.text-accent-red { color: var(--accent-red); }
+.text-accent-yellow { color: var(--accent-yellow); }
+
+.bg-accent-blue { background-color: var(--accent-blue); }
+.bg-accent-green { background-color: var(--accent-green); }
+.bg-accent-red { background-color: var(--accent-red); }
+.bg-accent-yellow { background-color: var(--accent-yellow); }
+
+.border-accent-blue { border-color: var(--accent-blue); }
+.border-accent-green { border-color: var(--accent-green); }
+.border-accent-red { border-color: var(--accent-red); }
+.border-accent-yellow { border-color: var(--accent-yellow); }
+
+/* Custom Scrollbar Styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* Firefox scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) transparent;
+}
+
+/* PR Count Badge */
+.pr-count-badge {
+  color: rgb(126, 34, 206); /* purple-700 for light mode */
+}
+
+.dark .pr-count-badge {
+  color: rgb(233, 213, 255); /* purple-200 for dark mode */
+}
+
+/* Enhanced card shadows for better separation in dark mode */
+.card-elevated {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.dark .card-elevated {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  border-color: #27272a; /* zinc-800 for better visibility */
+}
+
+/* Section dividers */
+.section-divider {
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
