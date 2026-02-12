@@ -159,6 +159,7 @@ export function CreatePRDialog({
 
       if (!response.ok) {
         const error = await response.json()
+        console.error('PR creation error:', error)
         const errorMessage = error.details || error.error || 'Failed to create PR'
         
         // Provide more helpful error messages
@@ -167,7 +168,7 @@ export function CreatePRDialog({
         }
         
         if (errorMessage.includes('Not Found') || response.status === 404) {
-          throw new Error('Branch not found. Please ensure the branch exists and try again.')
+          throw new Error(`Branch not found. Head: ${headBranch}, Base: ${baseBranch}. ${errorMessage}`)
         }
         
         throw new Error(errorMessage)

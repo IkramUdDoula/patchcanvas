@@ -23,7 +23,6 @@ export default function Dashboard() {
       <header className="border-b border-border">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <GitMerge className="h-6 w-6 text-accent-blue" />
             <span className="font-semibold text-lg">PatchCanvas</span>
           </div>
           <div className="flex items-center gap-2">
