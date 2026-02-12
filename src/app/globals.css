@@ -162,34 +162,47 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: var(--background);
+  background: transparent;
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--muted-foreground);
+  background: #d4d4d8; /* zinc-300 for light mode */
   border-radius: 4px;
-  border: 2px solid var(--background);
+  border: 2px solid transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground);
+  background: #a1a1aa; /* zinc-400 for light mode */
 }
 
 .custom-scrollbar::-webkit-scrollbar-corner {
-  background: var(--background);
+  background: transparent;
 }
 
 /* Firefox scrollbar */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: var(--muted-foreground) var(--background);
+  scrollbar-color: #d4d4d8 transparent;
+}
+
+/* Dark mode scrollbar */
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3f3f46; /* zinc-700 for dark mode */
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #52525b; /* zinc-600 for dark mode */
+}
+
+.dark .custom-scrollbar {
+  scrollbar-color: #3f3f46 transparent;
 }
 
 /* Apply custom scrollbar globally */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--muted-foreground) var(--background);
+  scrollbar-color: #d4d4d8 transparent;
 }
 
 *::-webkit-scrollbar {
@@ -198,22 +211,35 @@ body {
 }
 
 *::-webkit-scrollbar-track {
-  background: var(--background);
+  background: transparent;
   border-radius: 4px;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: var(--muted-foreground);
+  background: #d4d4d8; /* zinc-300 for light mode */
   border-radius: 4px;
-  border: 2px solid var(--background);
+  border: 2px solid transparent;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground);
+  background: #a1a1aa; /* zinc-400 for light mode */
 }
 
 *::-webkit-scrollbar-corner {
-  background: var(--background);
+  background: transparent;
+}
+
+/* Dark mode global scrollbar */
+.dark *::-webkit-scrollbar-thumb {
+  background: #3f3f46; /* zinc-700 for dark mode */
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: #52525b; /* zinc-600 for dark mode */
+}
+
+.dark * {
+  scrollbar-color: #3f3f46 transparent;
 }
 
 /* PR Count Badge */
