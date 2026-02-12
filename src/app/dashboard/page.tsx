@@ -4,7 +4,6 @@ import { useUser } from "@clerk/nextjs"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { UserMenu } from "@/components/layout/user-menu"
 import { RepositoryList } from "@/components/repos/repository-list"
-import { GitMerge } from "lucide-react"
 
 export default function Dashboard() {
   const { user, isLoaded } = useUser()
@@ -23,7 +22,6 @@ export default function Dashboard() {
       <header className="border-b border-border">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <GitMerge className="h-6 w-6 text-accent-blue" />
             <span className="font-semibold text-lg">PatchCanvas</span>
           </div>
           <div className="flex items-center gap-2">
