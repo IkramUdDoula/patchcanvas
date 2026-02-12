@@ -39,6 +39,16 @@ export function RepositoryList() {
                         errorData?.message?.includes('permission') ||
                         errorData?.message?.includes('scope');
     
+    const handleRefresh = async () => {
+      // Clear token cache before retrying
+      try {
+        await fetch('/api/github/refresh', { method: 'POST' });
+      } catch (e) {
+        console.error('Failed to refresh token:', e);
+      }
+      refetch();
+    };
+    
     return (
       <div className="space-y-4">
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6">
@@ -52,24 +62,27 @@ export function RepositoryList() {
             }
           </p>
           
-          <div className="text-sm space-y-2 mb-4">
-            <p className="font-medium">To fix this:</p>
-            <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-              <li>Click your profile icon in the top right</li>
-              <li>Select "Manage account"</li>
-              <li>Go to "Connected accounts"</li>
-              <li>Find GitHub and click "Reconnect"</li>
-              <li>Make sure to authorize access to repositories</li>
-              <li>Return here and click "Retry"</li>
-            </ol>
-          </div>
+          {needsReauth && (
+            <div className="text-sm space-y-3 mb-4">
+              <p className="font-medium">To fix this, reconnect your GitHub account:</p>
+              <ol className="list-decimal list-inside space-y-2 text-muted-foreground ml-2">
+                <li>Click your <span className="font-medium text-foreground">profile icon</span> in the top right corner</li>
+                <li>Select <span className="font-medium text-foreground">"Manage account"</span></li>
+                <li>Go to the <span className="font-medium text-foreground">"Connected accounts"</span> tab</li>
+                <li>Find <span className="font-medium text-foreground">GitHub</span> and click <span className="font-medium text-foreground">"Disconnect"</span></li>
+                <li>Click <span className="font-medium text-foreground">"Connect"</span> again</li>
+                <li>Make sure to <span className="font-medium text-foreground">authorize access to repositories</span> when prompted</li>
+                <li>Return here and your repositories will load automatically</li>
+              </ol>
+            </div>
+          )}
           
           <Button
             variant="outline"
             size="sm"
-            onClick={() => refetch()}
+            onClick={handleRefresh}
           >
-            Retry
+            Refresh
           </Button>
         </div>
       </div>

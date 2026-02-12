@@ -54,7 +54,7 @@ export function CreatePRDialog({
   const [isCreating, setIsCreating] = useState(false)
   const [branches, setBranches] = useState<Branch[]>([])
   const [isLoadingBranches, setIsLoadingBranches] = useState(false)
-  const [createNewBranch, setCreateNewBranch] = useState(true)
+  const [createNewBranch, setCreateNewBranch] = useState(false)
   const [newBranchName, setNewBranchName] = useState('')
   
   // Parse commit message - first line is title

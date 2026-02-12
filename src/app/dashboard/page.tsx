@@ -4,7 +4,6 @@ import { useUser } from "@clerk/nextjs"
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { UserMenu } from "@/components/layout/user-menu"
 import { RepositoryList } from "@/components/repos/repository-list"
-import { GitMerge } from "lucide-react"
 
 export default function Dashboard() {
   const { user, isLoaded } = useUser()

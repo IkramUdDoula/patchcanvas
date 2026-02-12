@@ -132,14 +132,15 @@ Open [http://localhost:8080](http://localhost:8080) and start reviewing! 🎉
 1. Create a Clerk account at [dashboard.clerk.com](https://dashboard.clerk.com)
 2. Create a new application
 3. Enable GitHub OAuth:
-   - Navigate to **Configure** → **SSO Connections**
+   - Navigate to **User & Authentication** → **Social Connections**
    - Enable **GitHub**
-   - Add scopes: `read:user` and `repo`
 4. Copy your API keys to `.env.local`:
    ```env
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
    CLERK_SECRET_KEY=sk_test_...
    ```
+
+**Important**: Clerk's default GitHub connection only requests `read:user` and `user:email` scopes. To access private repositories, you must programmatically request the `repo` scope using Clerk's `additionalScopes` parameter. See [docs/CLERK_GITHUB_SETUP.md](./docs/CLERK_GITHUB_SETUP.md) for detailed implementation.
 
 </details>
 
@@ -286,10 +287,50 @@ Found a bug or have an idea? We'd love to hear from you!
 <details>
 <summary><b>Private repositories not showing</b></summary>
 
-1. Verify GitHub OAuth scopes in Clerk dashboard
-2. Ensure `repo` scope is enabled (not just `read:user`)
-3. Reconnect GitHub account in profile settings
-4. Clear browser cache and hard refresh (Ctrl+Shift+R)
+**This is the most common issue!** It happens when the GitHub token lacks the `repo` scope.
+
+**Root Cause**: Clerk's default GitHub OAuth only requests `read:user` and `user:email` scopes, which don't include access to private repositories.
+
+**Solution - Implement Scope Request**:
+
+Add this code to request the `repo` scope when users connect GitHub:
+
+```typescript
+import { useSignIn } from '@clerk/nextjs';
+
+const { signIn } = useSignIn();
+
+await signIn?.authenticateWithRedirect({
+  strategy: 'oauth_github',
+  redirectUrl: '/dashboard',
+  redirectUrlComplete: '/dashboard',
+  additionalScopes: ['repo'], // Request private repo access
+});
+```
+
+For existing users, trigger reauthorization:
+
+```typescript
+import { useUser } from '@clerk/nextjs';
+
+const { user } = useUser();
+const githubAccount = user?.externalAccounts.find(
+  acc => acc.provider === 'github'
+);
+
+await githubAccount?.reauthorize({
+  additionalScopes: ['repo'],
+  redirectUrl: '/dashboard',
+});
+```
+
+**Debug Token Issues:**
+```bash
+# Check token scopes and permissions
+curl http://localhost:8080/api/github/diagnostics
+```
+
+See [docs/CLERK_GITHUB_SETUP.md](./docs/CLERK_GITHUB_SETUP.md) for complete implementation guide.
 
 </details>
 
