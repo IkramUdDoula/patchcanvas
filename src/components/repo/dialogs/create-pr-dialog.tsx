@@ -166,6 +166,10 @@ export function CreatePRDialog({
           throw new Error('This commit is already in the target branch. No changes to create a PR.')
         }
         
+        if (errorMessage.includes('Not Found') || response.status === 404) {
+          throw new Error('Branch not found. Please ensure the branch exists and try again.')
+        }
+        
         throw new Error(errorMessage)
       }
 
