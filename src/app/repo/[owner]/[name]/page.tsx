@@ -57,19 +57,21 @@ export default function RepositoryPage() {
     <div className="h-screen flex flex-col overflow-hidden">
       <ContextBar showBackButton />
       
-      <div className="flex-1 flex overflow-hidden relative bg-background p-2 gap-2">
-        <RepoExplorer
-          owner={owner}
-          repo={name}
-          defaultBranch={defaultBranch}
-        />
+      <div className="flex-1 overflow-x-auto overflow-y-hidden relative bg-background p-2 custom-scrollbar">
+        <div className="flex h-full gap-2 min-w-max xl:min-w-0">
+          <RepoExplorer
+            owner={owner}
+            repo={name}
+            defaultBranch={defaultBranch}
+          />
 
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full bg-card rounded-lg shadow-sm border border-border overflow-auto">
-            <ContentViewer
-              defaultBranch={defaultBranch}
-            />
+          {/* Main Content Area */}
+          <div className="flex-1 overflow-hidden min-w-[400px]">
+            <div className="h-full bg-card rounded-lg shadow-sm border border-border overflow-auto custom-scrollbar">
+              <ContentViewer
+                defaultBranch={defaultBranch}
+              />
+            </div>
           </div>
         </div>
       </div>
