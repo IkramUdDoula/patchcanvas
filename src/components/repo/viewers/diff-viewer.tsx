@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
-import { AlertCircle, FileCode, ChevronLeft, ChevronRight, Info } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { AlertCircle, FileCode, ChevronLeft, ChevronRight, Info, CheckCircle2, Circle } from 'lucide-react'
 import { FileDiff } from '@/lib/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -12,10 +12,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { useTheme } from 'next-themes'
 import { useRepoExplorerStore } from '@/stores/repo-explorer-store'
-import { useReviewStateStore } from '@/stores/review-state-store'
-import { usePRFiles, useCommitFiles } from '@/components/repo/hooks/use-repo-data'
-import { calculatePRReviewProgress } from '@/lib/review-progress'
-import { ReviewReadinessIndicator } from '@/components/repo/review/review-readiness-indicator'
+import { useFileReviewStatus } from '@/hooks/use-file-review-status'
 
 function getLanguageFromPath(path: string): string {
   const ext = path.split('.').pop()?.toLowerCase()
@@ -127,48 +124,17 @@ export function InteractiveDiffViewer({
   })
   const [currentHunkIndex, setCurrentHunkIndex] = useState(0)
 
-  // Get selection context for review progress
+  // Get selection context
   const selection = useRepoExplorerStore().selection
-  const getPRReviewStates = useReviewStateStore().getPRReviewStates
-  const getCommitReviewStates = useReviewStateStore().getCommitReviewStates
   
-  // Fetch files for review progress calculation
-  const { files: prFiles } = usePRFiles(owner, repo, selection?.prNumber ?? 0)
-  const { files: commitFiles } = useCommitFiles(owner, repo, selection?.commitSha ?? '')
-  
-  // Calculate review progress based on context (PR or commit)
-  const reviewProgress = useMemo(() => {
-    if (selection?.prNumber) {
-      const files = prFiles
-      if (!files.length) return null
-      const fileReviewStates = getPRReviewStates(selection.prNumber)
-      
-      if (fileReviewStates.length === 0) {
-        const initialStates = files.map(file => ({
-          prNumber: selection.prNumber!,
-          filename: file.filename,
-          state: 'not_reviewed' as const
-        }))
-        return calculatePRReviewProgress(initialStates)
-      }
-      return calculatePRReviewProgress(fileReviewStates)
-    } else if (selection?.commitSha) {
-      const files = commitFiles
-      if (!files.length) return null
-      const fileReviewStates = getCommitReviewStates(selection.commitSha)
-      
-      if (fileReviewStates.length === 0) {
-        const initialStates = files.map(file => ({
-          commitSha: selection.commitSha!,
-          filename: file.filename,
-          state: 'not_reviewed' as const
-        }))
-        return calculatePRReviewProgress(initialStates)
-      }
-      return calculatePRReviewProgress(fileReviewStates)
-    }
-    return null
-  }, [selection?.prNumber, selection?.commitSha, prFiles, commitFiles, getPRReviewStates, getCommitReviewStates])
+  // Use file review status hook
+  const { status: fileStatus, toggleStatus: handleStatusToggle } = useFileReviewStatus(
+    owner,
+    repo,
+    filePath,
+    selection?.commitSha,
+    selection?.prNumber
+  )
 
   useEffect(() => {
     const fetchDiff = async () => {
@@ -324,12 +290,39 @@ export function InteractiveDiffViewer({
           </div>
         </div>
         
-        {/* Review Progress */}
-        {reviewProgress && (
-          <div className="flex items-center gap-4 pt-2 border-t border-border/50">
-            <ReviewReadinessIndicator status={reviewProgress.status} progress={reviewProgress} />
-          </div>
-        )}
+        {/* File Status */}
+        <div className="flex items-center gap-4 pt-2 border-t border-border/50">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleStatusToggle}
+                  className={cn(
+                    "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all",
+                    fileStatus === 'done'
+                      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  )}
+                >
+                  {fileStatus === 'done' ? (
+                    <>
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Done
+                    </>
+                  ) : (
+                    <>
+                      <Circle className="h-3.5 w-3.5" />
+                      Pending
+                    </>
+                  )}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Click to mark as {fileStatus === 'done' ? 'pending' : 'done'}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
 
       {/* Hunks List */}

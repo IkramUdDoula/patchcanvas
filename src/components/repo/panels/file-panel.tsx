@@ -1,7 +1,7 @@
 'use client'
 
-import { memo, useMemo, useState } from 'react'
-import { FileCode, ChevronLeft, Filter, X } from 'lucide-react'
+import { memo, useMemo, useState, useEffect } from 'react'
+import { FileCode, ChevronLeft, Filter, X, CheckCircle2 } from 'lucide-react'
 import { useRepoExplorerStore } from '@/stores/repo-explorer-store'
 import { useCommitFiles } from '../hooks/use-repo-data'
 import { cn } from '@/lib/utils'
@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { CommitFile } from '@/lib/types'
+import { getCommitFileReviews, getPRFileReviews, FileReviewRecord } from '@/lib/db'
 
 interface FilePanelProps {
   onCollapse: () => void
@@ -37,6 +38,38 @@ export const FilePanel = memo(function FilePanel({ onCollapse }: FilePanelProps)
   
   const [filter, setFilter] = useState('')
   const [status, setStatus] = useState<'all' | 'added' | 'modified' | 'deleted' | 'renamed'>('all')
+  const [fileReviews, setFileReviews] = useState<Map<string, 'pending' | 'done'>>(new Map())
+
+  // Load file review statuses from IndexedDB
+  useEffect(() => {
+    const loadReviews = async () => {
+      if (!owner || !repo) return
+      
+      try {
+        let reviews: FileReviewRecord[] = []
+        
+        if (selection?.commitSha) {
+          reviews = await getCommitFileReviews(owner, repo, selection.commitSha)
+        } else if (selection?.prNumber) {
+          reviews = await getPRFileReviews(owner, repo, selection.prNumber)
+        }
+        
+        const reviewMap = new Map<string, 'pending' | 'done'>()
+        reviews.forEach(review => {
+          reviewMap.set(review.filename, review.status)
+        })
+        setFileReviews(reviewMap)
+      } catch (error) {
+        console.error('Failed to load file reviews:', error)
+      }
+    }
+    
+    loadReviews()
+    
+    // Set up an interval to refresh reviews (in case they're updated in another tab/component)
+    const interval = setInterval(loadReviews, 2000)
+    return () => clearInterval(interval)
+  }, [owner, repo, selection?.commitSha, selection?.prNumber])
 
   const statusCounts = useMemo(() => ({
     all: files.length,
@@ -160,35 +193,44 @@ export const FilePanel = memo(function FilePanel({ onCollapse }: FilePanelProps)
           </div>
         ) : (
           <div className="p-2 space-y-1">
-            {filteredFiles.map((file) => (
-              <button
-                key={file.filename}
-                onClick={() => handleFileClick(file)}
-                className={cn(
-                  'w-full text-left px-2.5 py-2 rounded-md border transition-all',
-                  selection?.filePath === file.filename
-                    ? 'bg-primary/10 border-primary/50 shadow-sm'
-                    : 'border-transparent hover:bg-muted/50 hover:border-border/50'
-                )}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <FileCode className={cn(
-                    "h-3 w-3 flex-shrink-0",
-                    file.status === 'added' && "text-emerald-600 dark:text-emerald-400",
-                    file.status === 'deleted' && "text-red-600 dark:text-red-400",
-                    file.status === 'modified' && "text-amber-600 dark:text-amber-400",
-                    file.status === 'renamed' && "text-blue-600 dark:text-blue-400",
-                    !['added', 'deleted', 'modified', 'renamed'].includes(file.status) && 
-                      (selection?.filePath === file.filename ? "text-primary" : "text-muted-foreground")
-                  )} />
-                  <span className="font-mono text-xs truncate flex-1">{file.filename}</span>
-                  <div className="flex items-center gap-1.5 flex-shrink-0 text-[10px]">
-                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">+{file.additions}</span>
-                    <span className="text-red-600 dark:text-red-400 font-medium">-{file.deletions}</span>
+            {filteredFiles.map((file) => {
+              const reviewStatus = fileReviews.get(file.filename)
+              const isDone = reviewStatus === 'done'
+              
+              return (
+                <button
+                  key={file.filename}
+                  onClick={() => handleFileClick(file)}
+                  className={cn(
+                    'w-full text-left px-2.5 py-2 rounded-md border transition-all',
+                    selection?.filePath === file.filename
+                      ? 'bg-primary/10 border-primary/50 shadow-sm'
+                      : 'border-transparent hover:bg-muted/50 hover:border-border/50'
+                  )}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    {isDone ? (
+                      <CheckCircle2 className="h-3 w-3 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    ) : (
+                      <FileCode className={cn(
+                        "h-3 w-3 flex-shrink-0",
+                        file.status === 'added' && "text-emerald-600 dark:text-emerald-400",
+                        file.status === 'deleted' && "text-red-600 dark:text-red-400",
+                        file.status === 'modified' && "text-amber-600 dark:text-amber-400",
+                        file.status === 'renamed' && "text-blue-600 dark:text-blue-400",
+                        !['added', 'deleted', 'modified', 'renamed'].includes(file.status) && 
+                          (selection?.filePath === file.filename ? "text-primary" : "text-muted-foreground")
+                      )} />
+                    )}
+                    <span className="font-mono text-xs truncate flex-1">{file.filename}</span>
+                    <div className="flex items-center gap-1.5 flex-shrink-0 text-[10px]">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">+{file.additions}</span>
+                      <span className="text-red-600 dark:text-red-400 font-medium">-{file.deletions}</span>
+                    </div>
                   </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              )
+            })}
           </div>
         )}
       </div>
