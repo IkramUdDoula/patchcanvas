@@ -1,12 +1,22 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
-import { GitBranch, Calendar, GitCommit, AlertCircle, GitPullRequest, User, Clock, ArrowRight, XCircle, GitMerge } from 'lucide-react'
+import { GitBranch, Calendar, GitCommit, AlertCircle, GitPullRequest, User, Clock, ArrowRight, XCircle, GitMerge, Trash2 } from 'lucide-react'
 import { Branch, PullRequest, Commit } from '@/lib/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { useRepoExplorerStore } from '@/stores/repo-explorer-store'
+import { useQueryClient } from '@tanstack/react-query'
 import { cn } from '@/lib/utils'
 
 interface BranchDetailsProps {
@@ -21,12 +31,56 @@ export function BranchDetails({ owner, repo, branchName }: BranchDetailsProps) {
   const [commits, setCommits] = useState<Commit[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { selectPR, selectCommit } = useRepoExplorerStore()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const { selectPR, selectCommit, selectBranch } = useRepoExplorerStore()
+  const queryClient = useQueryClient()
 
   // Filter open PRs for this branch
   const openPRs = useMemo(() => {
     return prs.filter(pr => pr.sourceBranch === branchName && pr.state === 'open')
   }, [prs, branchName])
+
+  const handleDeleteBranch = async () => {
+    try {
+      setIsDeleting(true)
+      setDeleteError(null)
+
+      const response = await fetch(`/api/branches/delete?owner=${owner}&repo=${repo}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ branch: branchName }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to delete branch')
+      }
+
+      // Invalidate branches cache to trigger instant refresh in branch panel
+      await queryClient.invalidateQueries({ queryKey: ['branches-graphql', owner, repo] })
+      
+      // Close dialog
+      setShowDeleteDialog(false)
+      
+      // Fetch default branch and select it
+      const branchResponse = await fetch(`/api/repos?action=branches&owner=${owner}&repo=${repo}`)
+      if (branchResponse.ok) {
+        const branches = await branchResponse.json()
+        const defaultBranch = branches.find((b: Branch) => b.isDefault)
+        if (defaultBranch) {
+          selectBranch(defaultBranch.name)
+        }
+      }
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete branch')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   useEffect(() => {
     const fetchBranchDetails = async () => {
@@ -137,9 +191,60 @@ export function BranchDetails({ owner, repo, branchName }: BranchDetailsProps) {
                 Protected
               </Badge>
             )}
+            {!branch.isDefault && !branch.protected && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDeleteDialog(true)}
+                className="h-7 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete branch</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the branch <code className="font-mono text-sm bg-muted px-1 py-0.5 rounded">{branchName}</code>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          {deleteError && (
+            <div className="text-sm text-destructive p-3 bg-destructive/10 rounded-md border border-destructive/20">
+              {deleteError}
+            </div>
+          )}
+
+          {openPRs.length > 0 && (
+            <div className="text-sm text-amber-600 dark:text-amber-400 p-3 bg-amber-50 dark:bg-amber-950/20 rounded-md border border-amber-200 dark:border-amber-900">
+              Warning: This branch has {openPRs.length} open pull request{openPRs.length > 1 ? 's' : ''}. Deleting it may affect those PRs.
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteBranch}
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete branch'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Details Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
