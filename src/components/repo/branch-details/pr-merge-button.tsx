@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { GitMerge, ChevronDown, Loader2, AlertCircle, CheckCircle2, XCircle } from 'lucide-react'
+import { GitMerge, ChevronDown, Loader2, AlertCircle, CheckCircle2, XCircle, ExternalLink } from 'lucide-react'
 import { PRDetails, CheckRun, PRReview } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { cacheDelete } from '@/lib/indexdb'
@@ -169,6 +169,77 @@ export function PRMergeButton({ pr, checks, reviews, onMergeSuccess, onCloseSucc
     )
   }
 
+  // Show resolve conflicts button if PR has conflicts
+  if (pr.hasConflicts) {
+    const pathParts = window.location.pathname.split('/')
+    const owner = pathParts[2]
+    const repo = pathParts[3]
+    const conflictsUrl = `https://github.com/${owner}/${repo}/pull/${pr.number}/conflicts`
+    
+    return (
+      <div className="flex gap-2">
+        <Button 
+          variant="destructive"
+          onClick={() => window.open(conflictsUrl, '_blank')}
+          className="gap-2"
+        > Resolve conflicts
+        </Button>
+        
+        {/* Close PR button - always available for open PRs */}
+        <Button 
+          variant="outline" 
+          onClick={() => setShowCloseConfirm(true)}
+          disabled={merging || closing}
+          className="gap-2"
+        >
+          {closing ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Closing...
+            </>
+          ) : (
+            <>
+              <XCircle className="h-4 w-4" />
+              Close PR
+            </>
+          )}
+        </Button>
+        
+        <Dialog open={showCloseConfirm} onOpenChange={setShowCloseConfirm}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Close pull request</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to close this pull request without merging?
+                You can reopen it later if needed.
+              </DialogDescription>
+            </DialogHeader>
+            {error && (
+              <div className="text-sm text-red-600 dark:text-red-400 p-3 bg-red-50 dark:bg-red-950/20 rounded-md border border-red-200 dark:border-red-900">
+                {error}
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCloseConfirm(false)} disabled={closing}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleClose} disabled={closing}>
+                {closing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Closing...
+                  </>
+                ) : (
+                  'Close pull request'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    )
+  }
+
   // Show merge button with status popover
   return (
     <>
@@ -185,12 +256,6 @@ export function PRMergeButton({ pr, checks, reviews, onMergeSuccess, onCloseSucc
               <div className="space-y-3">
                 <h4 className="font-semibold text-sm">Merge requirements</h4>
                 <div className="space-y-2 text-sm">
-                  {pr.hasConflicts && (
-                    <div className="flex items-center gap-2 text-red-600">
-                      <XCircle className="h-4 w-4 flex-shrink-0" />
-                      <span>This branch has conflicts</span>
-                    </div>
-                  )}
                   {checksStatus === 'failure' && (
                     <div className="flex items-center gap-2 text-red-600">
                       <XCircle className="h-4 w-4 flex-shrink-0" />
@@ -209,7 +274,7 @@ export function PRMergeButton({ pr, checks, reviews, onMergeSuccess, onCloseSucc
                       <span>Changes requested</span>
                     </div>
                   )}
-                  {!pr.hasConflicts && checksStatus === 'success' && changesRequested === 0 && (
+                  {checksStatus === 'success' && changesRequested === 0 && (
                     <div className="flex items-center gap-2 text-emerald-600">
                       <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
                       <span>All requirements met</span>

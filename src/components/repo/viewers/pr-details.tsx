@@ -7,7 +7,9 @@ import {
   XCircle, 
   Clock,
   ArrowRight,
-  GitBranch
+  GitBranch,
+  AlertTriangle,
+  ExternalLink
 } from 'lucide-react'
 import { usePRDetails, usePRFiles, useCommits, usePRReviews, usePRChecks } from '@/components/repo/hooks/use-repo-data'
 import { useRepoExplorerStore } from '@/stores/repo-explorer-store'
@@ -193,6 +195,36 @@ export function PRDetails({ owner, repo, prNumber }: PRDetailsProps) {
       {/* Details Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <div className="p-4 space-y-4">
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            MERGE CONFLICT WARNING BANNER
+        ═══════════════════════════════════════════════════════════════════ */}
+        {prDetails.hasConflicts && (
+          <div className="p-3 rounded-lg border border-orange-500/50 bg-orange-500/10">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-orange-900 dark:text-orange-200">
+                  This pull request has merge conflicts
+                </p>
+                <p className="text-xs text-orange-800 dark:text-orange-300 mt-1">
+                  You must resolve the conflicts before this can be merged.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  const pathParts = window.location.pathname.split('/')
+                  const conflictsUrl = `https://github.com/${pathParts[2]}/${pathParts[3]}/pull/${prNumber}/conflicts`
+                  window.open(conflictsUrl, '_blank')
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-orange-900 dark:text-orange-200 bg-orange-200 dark:bg-orange-900/30 hover:bg-orange-300 dark:hover:bg-orange-900/50 rounded-md transition-colors"
+              >
+                Resolve on GitHub
+                <ExternalLink className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ═══════════════════════════════════════════════════════════════════
             SECTION: COMMITS

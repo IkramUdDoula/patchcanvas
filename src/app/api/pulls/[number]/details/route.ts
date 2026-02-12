@@ -42,6 +42,7 @@ export async function GET(
       merged: pr.merged,
       mergeable: pr.mergeable,
       mergeable_state: pr.mergeable_state,
+      hasConflicts: pr.mergeable === false,
       author: {
         login: pr.user?.login || 'unknown',
         avatar_url: pr.user?.avatar_url || '',
