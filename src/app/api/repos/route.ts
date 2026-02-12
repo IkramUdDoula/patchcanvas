@@ -251,7 +251,7 @@ export async function GET(request: Request) {
         },
         state: pr.state,
         draft: pr.draft,
-        hasConflicts: (pr as any).mergeable === false,
+        hasConflicts: (pr as any).mergeable === false || (pr as any).mergeable_state === 'dirty',
         targetBranch: pr.base.ref,
         sourceBranch: pr.head.ref,
         createdAt: pr.created_at,
@@ -284,6 +284,7 @@ export async function GET(request: Request) {
         draft: pr.draft,
         mergeable: pr.mergeable,
         mergeable_state: pr.mergeable_state,
+        hasConflicts: pr.mergeable === false,
         author: {
           login: pr.user?.login || 'unknown',
           avatar_url: pr.user?.avatar_url || '',
