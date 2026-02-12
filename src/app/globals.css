@@ -156,27 +156,63 @@ body {
 
 /* Custom Scrollbar Styles */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 8px;
+  height: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--background);
+  border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--muted);
-  border-radius: 2px;
+  background: var(--muted-foreground);
+  border-radius: 4px;
+  border: 2px solid var(--background);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
+  background: var(--foreground);
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background: var(--background);
 }
 
 /* Firefox scrollbar */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: var(--muted) transparent;
+  scrollbar-color: var(--muted-foreground) var(--background);
+}
+
+/* Apply custom scrollbar globally */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted-foreground) var(--background);
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--background);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 4px;
+  border: 2px solid var(--background);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--background);
 }
 
 /* PR Count Badge */
