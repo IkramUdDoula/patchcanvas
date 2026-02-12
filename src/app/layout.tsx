@@ -19,6 +19,19 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PatchCanvas",
   description: "Visual Git review and selective merge system",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "PatchCanvas",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-192x192.svg", sizes: "192x192", type: "image/svg+xml" },
+      { url: "/icons/icon-512x512.svg", sizes: "512x512", type: "image/svg+xml" },
+    ],
+    apple: "/icons/icon-192x192.svg",
+  },
 };
 
 export default function RootLayout({

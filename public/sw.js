@@ -1,6 +1,13 @@
-// Service Worker for GitHub API caching
-const CACHE_NAME = 'patchcanvas-github-api-v1'
+// Service Worker for PWA and GitHub API caching
+const CACHE_NAME = 'patchcanvas-v1'
+const API_CACHE_NAME = 'patchcanvas-github-api-v1'
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
+// Static assets to cache for offline support
+const STATIC_ASSETS = [
+  '/',
+  '/manifest.json',
+]
 
 // GitHub API endpoints to cache
 const CACHEABLE_URLS = [
@@ -12,7 +19,11 @@ const CACHEABLE_URLS = [
 ]
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting()
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .then(() => self.skipWaiting())
+  )
 })
 
 self.addEventListener('activate', (event) => {
@@ -20,7 +31,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME)
+          .filter((name) => name !== CACHE_NAME && name !== API_CACHE_NAME)
           .map((name) => caches.delete(name))
       )
     })
@@ -38,7 +49,7 @@ self.addEventListener('fetch', (event) => {
   if (!shouldCache) return
 
   event.respondWith(
-    caches.open(CACHE_NAME).then(async (cache) => {
+    caches.open(API_CACHE_NAME).then(async (cache) => {
       const cached = await cache.match(event.request)
       
       // Check if cached response is still fresh

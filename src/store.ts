@@ -15,6 +15,14 @@ interface AppStore {
   expandedPRs: Set<number>;
   expandedCommits: Set<string>;
   
+  // Panel visibility state
+  panels: {
+    branch: boolean;
+    pr: boolean;
+    commit: boolean;
+    file: boolean;
+  };
+  
   // Selection state
   selectedItem: {
     type: 'branch' | 'pr' | 'commit' | 'file';
@@ -59,6 +67,7 @@ interface AppStore {
   toggleCommit: (sha: string) => void;
   selectItem: (item: AppStore['selectedItem']) => void;
   clearSelection: () => void;
+  togglePanel: (panel: 'branch' | 'pr' | 'commit' | 'file') => void;
 
   // Review actions
   setFileReviewState: (prNumber: number, filename: string, state: 'not_reviewed' | 'in_review' | 'reviewed') => void;
@@ -83,6 +92,12 @@ export const useStore = create<AppStore>((set, get) => ({
   expandedCommits: new Set(),
   selectedItem: null,
   fileReviews: {},
+  panels: {
+    branch: true,
+    pr: true,
+    commit: true,
+    file: true,
+  },
   filters: {
     branch: { search: '' },
     pr: { search: '', state: 'all' },
@@ -125,6 +140,14 @@ export const useStore = create<AppStore>((set, get) => ({
   selectItem: (item) => set({ selectedItem: item }),
   
   clearSelection: () => set({ selectedItem: null }),
+
+  togglePanel: (panel) =>
+    set((state) => ({
+      panels: {
+        ...state.panels,
+        [panel]: !state.panels[panel],
+      },
+    })),
 
   // Review actions
   setFileReviewState: (prNumber, filename, state) => {

@@ -74,7 +74,9 @@ export const PRPanel = memo(function PRPanel({ onCollapse }: PRPanelProps) {
         <div className="flex-1 min-w-0 flex items-center gap-1.5">
           <span className="text-xs font-semibold font-mono">#{pr.number}</span>
           {pr.hasConflicts && (
-            <AlertTriangle className="h-3 w-3 text-orange-600 dark:text-orange-400 flex-shrink-0" title="Has merge conflicts" />
+            <div title="Has merge conflicts">
+              <AlertTriangle className="h-3 w-3 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+            </div>
           )}
           <span className="text-[10px] text-muted-foreground truncate">
             {pr.state === 'merged' && pr.mergedAt

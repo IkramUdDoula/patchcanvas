@@ -68,14 +68,15 @@ export const useRepoExplorerStore = () => {
     setRepoContext: (owner: string, repo: string) => {
       // No-op: context comes from URL params now
     },
-    panels: {
-      branch: true,
-      pr: true,
-      commit: true,
-      file: true,
-    },
-    togglePanel: (panel: string) => {
-      // No-op: panels always visible in simplified version
+    panels: store.panels,
+    togglePanel: (panel: 'branches' | 'prs' | 'commits' | 'files') => {
+      const panelMap = {
+        branches: 'branch',
+        prs: 'pr',
+        commits: 'commit',
+        files: 'file',
+      } as const;
+      store.togglePanel(panelMap[panel]);
     },
   };
 };
