@@ -201,27 +201,16 @@ export function CreatePRDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-foreground">
             <GitPullRequest className="h-5 w-5" />
             Create Pull Request
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground dark:text-muted-foreground">
             Create a new pull request for this commit
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Warning about multiple commits */}
-          <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-3">
-            <div className="flex gap-2">
-              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-amber-900 dark:text-amber-100">
-                <p className="font-semibold mb-1">Creating PR from branch will include all commits</p>
-                <p>Branch <span className="font-mono bg-amber-500/20 px-1 py-0.5 rounded">{sourceBranch}</span> may contain multiple commits. To create a PR with only this commit, enable "Create new branch" below.</p>
-              </div>
-            </div>
-          </div>
-
           {/* Create new branch option */}
           <div className="flex items-start space-x-3 rounded-lg border border-border p-3">
             <Checkbox
@@ -231,7 +220,7 @@ export function CreatePRDialog({
               disabled={isCreating}
             />
             <div className="flex-1 space-y-2">
-              <Label htmlFor="create-branch" className="text-sm font-medium cursor-pointer">
+              <Label htmlFor="create-branch" className="text-sm font-medium cursor-pointer text-foreground">
                 Create new branch for this commit only
               </Label>
               <p className="text-xs text-muted-foreground">
@@ -250,7 +239,7 @@ export function CreatePRDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title" className="text-foreground">Title</Label>
             <Input
               id="title"
               placeholder="Enter PR title"
@@ -261,7 +250,7 @@ export function CreatePRDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="base">Base branch (target)</Label>
+            <Label htmlFor="base" className="text-foreground">Base branch (target)</Label>
             <Select
               value={baseBranch}
               onValueChange={setBaseBranch}
@@ -298,10 +287,10 @@ export function CreatePRDialog({
             </Select>
             <p className="text-xs text-muted-foreground">
               PR will merge {createNewBranch ? (
-                <>new branch <span className="font-mono bg-muted px-1 py-0.5 rounded">{newBranchName || '(unnamed)'}</span></>
+                <>new branch <span className="font-mono bg-muted px-1 py-0.5 rounded text-foreground">{newBranchName || '(unnamed)'}</span></>
               ) : (
-                <>branch <span className="font-mono bg-muted px-1 py-0.5 rounded">{sourceBranch}</span></>
-              )} into <span className="font-mono bg-muted px-1 py-0.5 rounded">{baseBranch}</span>
+                <>branch <span className="font-mono bg-muted px-1 py-0.5 rounded text-foreground">{sourceBranch}</span></>
+              )} into <span className="font-mono bg-muted px-1 py-0.5 rounded text-foreground">{baseBranch}</span>
             </p>
           </div>
         </div>

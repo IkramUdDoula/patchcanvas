@@ -7,7 +7,7 @@
   --background: #fafafa; /* zinc-50 */
   --foreground: #18181b; /* zinc-900 */
   --muted: #f4f4f5; /* zinc-100 */
-  --muted-foreground: #71717a; /* zinc-500 */
+  --muted-foreground: #52525b; /* zinc-600 - darker for better contrast */
   --border: #f4f4f5; /* zinc-100 - lighter */
   --input: #f4f4f5; /* zinc-100 - lighter */
   --ring: #3b82f6; /* blue-500 */
@@ -72,7 +72,7 @@
   --background: #fafafa;
   --foreground: #18181b;
   --muted: #f4f4f5;
-  --muted-foreground: #71717a;
+  --muted-foreground: #52525b; /* zinc-600 - darker for better contrast */
   --border: #f4f4f5;
   --input: #f4f4f5;
   --card: #ffffff;
