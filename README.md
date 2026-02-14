@@ -405,15 +405,6 @@ If you find PatchCanvas helpful, please consider:
 - 📝 Writing a blog post
 - 💬 Telling your friends
 
-## 📞 Contact & Community
-
-- 🌐 Website: [patchcanvas.dev](https://patchcanvas.dev) *(coming soon)*
-- 🐦 Twitter: [@patchcanvas](https://twitter.com/patchcanvas) *(coming soon)*
-- 💬 Discord: [Join our community](https://discord.gg/patchcanvas) *(coming soon)*
-- 📧 Email: hello@patchcanvas.dev *(coming soon)*
-
----
-
 <div align="center">
 
 **Made with ❤️ by the open source community**
