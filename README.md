@@ -35,10 +35,8 @@ PatchCanvas reimagines code review by providing a visual interface for reviewing
 > **Note**: Add screenshots or GIF demos here to showcase the application
 
 ```
-[Dashboard Screenshot]
-[Repository Browser Screenshot]
-[Review Canvas Screenshot]
-[Diff Viewer Screenshot]
+<img width="1906" height="932" alt="image" src="https://github.com/user-attachments/assets/d2863d12-6357-4e84-9ea8-5df4335fa345" />
+<img width="1919" height="941" alt="image" src="https://github.com/user-attachments/assets/c7b6326b-0c7d-4589-98b3-2943db528203" />
 ```
 
 ## ✨ Features
