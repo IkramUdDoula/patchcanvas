@@ -5,7 +5,6 @@ const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
 // Static assets to cache for offline support
 const STATIC_ASSETS = [
-  '/',
   '/manifest.json',
 ]
 
@@ -21,7 +20,17 @@ const CACHEABLE_URLS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .then(async (cache) => {
+        // Cache assets individually to avoid failing if one fails
+        const results = await Promise.allSettled(
+          STATIC_ASSETS.map(url => cache.add(url))
+        )
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            console.warn(`Failed to cache ${STATIC_ASSETS[index]}:`, result.reason)
+          }
+        })
+      })
       .then(() => self.skipWaiting())
   )
 })

@@ -10,6 +10,9 @@ export default clerkMiddleware(async (auth, request) => {
   if (!isPublicRoute(request)) {
     await auth.protect()
   }
+}, {
+  // Add clock skew tolerance for Docker environments
+  clockSkewInMs: 60000, // 60 seconds tolerance
 })
 
 export const config = {
