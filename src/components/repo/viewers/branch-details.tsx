@@ -18,6 +18,8 @@ import {
 import { useRepoExplorerStore } from '@/stores/repo-explorer-store'
 import { useQueryClient } from '@tanstack/react-query'
 import { cn } from '@/lib/utils'
+import { MergeBranchDialog } from '../dialogs/merge-branch-dialog'
+import { useBranches } from '../hooks/use-repo-data'
 
 interface BranchDetailsProps {
   owner: string
@@ -33,10 +35,13 @@ export function BranchDetails({ owner, repo, branchName }: BranchDetailsProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showMergeDialog, setShowMergeDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [comparisonData, setComparisonData] = useState<{ ahead_by: number; behind_by: number } | null>(null)
   const { selectPR, selectCommit, selectBranch } = useRepoExplorerStore()
   const queryClient = useQueryClient()
+  const { branches } = useBranches(owner, repo)
 
   // Filter open PRs for this branch (PRs targeting this branch)
   const openPRs = useMemo(() => {
@@ -97,6 +102,28 @@ export function BranchDetails({ owner, repo, branchName }: BranchDetailsProps) {
         const branches = await branchResponse.json()
         const foundBranch = branches.find((b: Branch) => b.name === branchName)
         setBranch(foundBranch || null)
+
+        // Fetch comparison with default branch if not default
+        if (foundBranch && !foundBranch.isDefault) {
+          const defaultBranch = branches.find((b: Branch) => b.isDefault)
+          if (defaultBranch) {
+            try {
+              const comparisonResponse = await fetch(
+                `/api/branches/compare?owner=${owner}&repo=${repo}&base=${defaultBranch.name}&head=${branchName}`
+              )
+              if (comparisonResponse.ok) {
+                const compData = await comparisonResponse.json()
+                setComparisonData(compData)
+              } else {
+                console.warn('Could not compare branches - branch may not exist on remote')
+              }
+            } catch (e) {
+              console.error('Failed to fetch comparison:', e)
+              // Don't show merge button if comparison fails
+              setComparisonData(null)
+            }
+          }
+        }
 
         // Fetch PRs for this branch
         const prResponse = await fetch(`/api/repos?action=pulls&owner=${owner}&repo=${repo}&state=open`)
@@ -202,6 +229,15 @@ export function BranchDetails({ owner, repo, branchName }: BranchDetailsProps) {
     },
   }
 
+  const canMerge = !branch.isDefault && !branch.protected && comparisonData && comparisonData.ahead_by > 0
+
+  const handleMergeSuccess = () => {
+    // Refresh branch data and PRs
+    setShowMergeDialog(false)
+    queryClient.invalidateQueries({ queryKey: ['branches-graphql', owner, repo] })
+    queryClient.invalidateQueries({ queryKey: ['pulls', owner, repo] })
+  }
+
   return (
     <div className="h-full flex flex-col bg-muted/30">
       {/* Branch Info Bar */}
@@ -220,6 +256,17 @@ export function BranchDetails({ owner, repo, branchName }: BranchDetailsProps) {
                 Protected
               </Badge>
             )}
+            {canMerge && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowMergeDialog(true)}
+                className="h-7 px-2 text-primary hover:text-primary hover:bg-primary/10"
+                title="Create PR to merge this branch"
+              >
+                <GitMerge className="h-3.5 w-3.5" />
+              </Button>
+            )}
             {!branch.isDefault && !branch.protected && (
               <Button
                 variant="ghost"
@@ -233,6 +280,17 @@ export function BranchDetails({ owner, repo, branchName }: BranchDetailsProps) {
           </div>
         </div>
       </div>
+
+      {/* Merge Dialog */}
+      <MergeBranchDialog
+        open={showMergeDialog}
+        onOpenChange={setShowMergeDialog}
+        sourceBranch={branchName}
+        owner={owner}
+        repo={repo}
+        branches={branches}
+        onSuccess={handleMergeSuccess}
+      />
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
