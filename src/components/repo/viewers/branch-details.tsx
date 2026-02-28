@@ -114,9 +114,13 @@ export function BranchDetails({ owner, repo, branchName }: BranchDetailsProps) {
               if (comparisonResponse.ok) {
                 const compData = await comparisonResponse.json()
                 setComparisonData(compData)
+              } else {
+                console.warn('Could not compare branches - branch may not exist on remote')
               }
             } catch (e) {
               console.error('Failed to fetch comparison:', e)
+              // Don't show merge button if comparison fails
+              setComparisonData(null)
             }
           }
         }
